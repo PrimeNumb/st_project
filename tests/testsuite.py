@@ -77,5 +77,48 @@ class AppendClearTests(unittest.TestCase):
     self.assertEqual(str(tag1), "<div><a>Test</a><div>Test2</div></div>")
     self.assertEqual(len(tag1.div.contents), 2)
 
+  def test_clear_simple(self):
+    simple_tag = "<div>Test</div>"
+    soup = BeautifulSoup(simple_tag, 'html.parser')
+
+    #Assure tag is not empty
+    self.assertEqual(soup.div.contents, ["Test"])
+    self.assertEqual(len(soup.div.contents), 1)
+
+    #Check simple clear
+    soup.div.clear()
+    self.assertEqual(str(soup), "<div></div>")
+    self.assertEqual(len(soup.div), 0)
+
+    #Clear empty tag
+    soup.div.clear()
+    self.assertEqual(str(soup), "<div></div>")
+    self.assertEqual(len(soup.div), 0)
+    
+    
+  def test_clear_w_append(self):
+    simple_tag = "<div><a>Test</a></div>"
+    banana_tag= "<div>Banana</div>"
+    soup = BeautifulSoup(simple_tag, 'html.parser')
+    banana_soup = BeautifulSoup(banana_tag, 'html.parser')
+
+    #Ensure banana div has been appended
+    soup.div.append(banana_soup)
+    self.assertEqual(str(soup), "<div><a>Test</a><div>Banana</div></div>")
+
+    #Check that only the <a> tag is cleared
+    soup.div.a.clear()
+    self.assertEqual(str(soup.div.a), "<a></a>")
+    self.assertEqual(len(soup.div.a), 0)
+    #Check that the other component was unaffected
+    self.assertEqual(str(soup.div.div), "<div>Banana</div>")
+    self.assertEqual(len(soup.div.div), 1)
+    self.assertEqual(str(soup), "<div><a></a><div>Banana</div></div>")
+
+    #Ensure that all children are removed
+    soup.div.clear() 
+    self.assertEqual(str(soup), "<div></div>")
+    self.assertEqual(len(soup.div), 0)
+
 if __name__ == '__main__':
     unittest.main()
