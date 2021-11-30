@@ -36,3 +36,7 @@ def _find_all(self, name, attrs, string, limit, generator, **kwargs):
     # Before editing
        # 32 lines with 4 misses => 1-4/32 = 87.5% statement coverage
        # 12 branches with 6 misses => 50 % branch coverage
+
+    # After editing
+        # 32 lines with 0 misses => 100% statement coverage
+        # 12 branches with 1 miss => 91.66% branch coverage

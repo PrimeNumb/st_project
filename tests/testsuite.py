@@ -1,5 +1,6 @@
 import unittest
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, SoupStrainer
+import textwrap
 
 
 class TreeNavigationTest(unittest.TestCase):
@@ -19,6 +20,7 @@ class TreeNavigationTest(unittest.TestCase):
             <img src="https://www.python.org/static/community_logos/python-logo.png" width="200px" height="130px" />
         </main>
         <a href="https://creativecommons.org/">Site goes under Creative Commons</a>
+        <aside:colon>Hello, World!</aside:colon>
     </body>
     </html>
     """
@@ -57,6 +59,7 @@ class TreeNavigationTest(unittest.TestCase):
         ]
 
         for (i, link) in enumerate(links):
+            self.assertTrue(i < 3)
             self.assertEqual(str(link), expected_links[i])
 
     # Test find all objects of a type but there are none
@@ -65,6 +68,48 @@ class TreeNavigationTest(unittest.TestCase):
         li = soup.find_all('li')
 
         self.assertTrue(len(li) == 0)
+ 
+    #Test find all with limit ADDITION FOR COVERAGE
+    def test_find_all_limit(self):
+        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
+        links = soup.find_all('a', limit=2)
+        expected_links = [
+            '<a href="https://www.wikipedia.org/">This is a hyperlink to wikipedia!</a>',
+            '<a href="https://www.facebook.com/">This is a hyperlink to facebook!</a>'
+        ]
+        
+        for (i, link) in enumerate(links):
+            self.assertTrue(i < 2)
+            self.assertEqual(str(link), expected_links[i])
+
+    # Test SoupStrainer ADDITION FOR COVERAGE
+    def test_find_all_soup_strainer(self):
+        only_a_tags = SoupStrainer('a')
+        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
+        links = soup.find_all(only_a_tags)
+        expected_links = [
+            '<a href="https://www.wikipedia.org/">This is a hyperlink to wikipedia!</a>',
+            '<a href="https://www.facebook.com/">This is a hyperlink to facebook!</a>',
+            '<a href="https://creativecommons.org/">Site goes under Creative Commons</a>'
+        ]
+        
+        for (i, link) in enumerate(links):
+            self.assertTrue(i < 3)
+            self.assertEqual(str(link), expected_links[i])
+
+    # Test name ADDITION FOR COVERAGE
+    def test_find_all_name(self):
+        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
+        links = soup.find_all(True)
+        self.assertIsNotNone(links)
+
+    # Test colon name ADDITION FOR COVERAGE
+    def test_find_all_colon_name(self):
+        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
+        aside = soup.find_all('aside:colon')
+
+        self.assertEqual(str(aside[0]), '<aside:colon>Hello, World!</aside:colon>')
+
 
     # Test find parent to find an object's parent
     def test_find_parent(self):
@@ -135,6 +180,7 @@ class TreeNavigationTest(unittest.TestCase):
 
         self.assertTrue(len(siblings) == 0)
 
+    
 
 if __name__ == '__main__':
     unittest.main()
