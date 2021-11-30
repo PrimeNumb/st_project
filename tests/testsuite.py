@@ -30,10 +30,11 @@ class TreeNavigationTest(unittest.TestCase):
 
     def test_find_strings_of_tags(self):
         soup = BeautifulSoup(self.html_text, 'html.parser')
-        head, body, p, a = soup.head.string, soup.body.string, soup.p.string, soup.a.string
+        head, body, p, a, title = soup.head.string, soup.body.string, soup.p.string, soup.a.string, soup.title.string
 
         self.assertEqual(head, 'The test title')
-        self.assertEqual(body, None)
+        self.assertEqual(title, 'The test title')
+        self.assertEqual(body, None) # If a tag contains more than one string element, then .string is defined to be None:
         self.assertEqual(p, 'This is a paragraph.')
         self.assertEqual(a, 'This is a hyperlink to wikipedia!')
 
@@ -53,7 +54,7 @@ class TreeNavigationTest(unittest.TestCase):
         
         self.assertEqual(body[1].string, 'This is a paragraph.')
         self.assertEqual(body[2].string, '\n')
-        self.assertEqual(body[3].string, None) # If a tag contains more than one thing, then .string is defined to be None:
+        self.assertEqual(body[3].string, None) # If a tag contains more than one string element, then .string is defined to be None:
         self.assertEqual(body[4].string, '\n')
 
     def test_strings_for_all_body_children(self):
@@ -66,6 +67,24 @@ class TreeNavigationTest(unittest.TestCase):
         self.assertEqual(body[1], 'This is a paragraph with hyperlinks')
         self.assertEqual(body[2], 'This is a hyperlink to wikipedia!')
         self.assertEqual(body[3], 'This is a hyperlink to facebook!')
+
+    def test_parent_from_tag(self):
+        soup = BeautifulSoup(self.html_text, 'html.parser')
+        title = soup.title
+        self.assertEqual(title.parent.string, 'The test title')
+    
+    def test_parents_from_tag(self):
+        soup = BeautifulSoup(self.html_text, 'html.parser')
+        a = soup.a
+
+        parents = []
+        for parent in a.parents:
+            parents.append(parent.name)
+        
+        self.assertEqual(parents[0], 'p')
+        self.assertEqual(parents[1], 'body')
+        self.assertEqual(parents[2], 'html')
+
 
 
 if __name__ == '__main__':
