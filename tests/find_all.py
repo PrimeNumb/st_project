@@ -8,8 +8,7 @@ def _find_all(self, name, attrs, string, limit, generator, **kwargs):
            strainer = SoupStrainer(name, attrs, string, **kwargs)
        if string is None and not limit and not attrs and not kwargs:
            if name is True or name is None:
-               result = (element for element in generator
-                         if isinstance(element, Tag))
+               result = (element for element in generator if isinstance(element, Tag))
                return ResultSet(strainer, result)
            elif isinstance(name, str):
                if name.count(':') == 1:
@@ -17,8 +16,7 @@ def _find_all(self, name, attrs, string, limit, generator, **kwargs):
                else:
                    prefix = None
                    local_name = name
-               result = (element for element in generator
-                         if isinstance(element, Tag) and (element.name == name) or (element.name == local_name and (prefix is None or element.prefix == prefix)))
+               result = (element for element in generator if isinstance(element, Tag) and (element.name == name) or (element.name == local_name and (prefix is None or element.prefix == prefix)))
                return ResultSet(strainer, result)
        results = ResultSet(strainer)
        while True:
@@ -35,4 +33,6 @@ def _find_all(self, name, attrs, string, limit, generator, **kwargs):
        return results
 
 
-       # 34 lines with 4 misses => 1-4/34 = 88.24% statement coverage
+    # Before editing
+       # 32 lines with 4 misses => 1-4/32 = 87.5% statement coverage
+       # 12 branches with 6 misses => 50 % branch coverage
