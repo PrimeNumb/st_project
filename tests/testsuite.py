@@ -245,7 +245,9 @@ class TreeNavigationBlackboxTest(unittest.TestCase):
         self.assertEqual(elements[2], '<a href="https://www.facebook.com/">This is a hyperlink to facebook!</a>')
         self.assertEqual(elements[3], "'This is a hyperlink to facebook!'")
         self.assertEqual(elements[4], "'\\n'")
-    
+
+class BsoupFunctionsBlackboxTest(unittest.TestCase):
+
     def test_smooth_basic(self):
         soup = BeautifulSoup('<p>A paragraph!</p>', 'html.parser')
         soup.p.append('Another paragraph')
