@@ -328,6 +328,7 @@ class TreeModificationTests(unittest.TestCase):
     <p class="p_class2"></p>
     <a href="https://www.google.com/">Google link></a>
     </body>
+    </html>
     """
 
     # insert()
@@ -368,20 +369,27 @@ class TreeModificationTests(unittest.TestCase):
     def test_insert_before_empty_insert(self):
         tree = BeautifulSoup(self.test_tree, "html.parser")
         expected = BeautifulSoup(self.test_tree, "html.parser")
-        tree.contents[0].insert_before("")
+        tree.contents[0].insert_before()
         self.assertEqual(tree.prettify(), expected.prettify())
 
-    def test_insert_before_parent_element(self):
+    def test_insert_before_PageElement_multiple(self):
         tree = BeautifulSoup(self.test_tree, "html.parser")
-        expected = "<p>Test paragraph</p>"
-        tree.contents[0].insert_before(expected)
-        self.assertEqual(tree.contents[0].string, expected)
+        expected = [BeautifulSoup("<p>Test paragraph</p>", "html.parser"), BeautifulSoup("<p>Test paragraph 2</p>", "html.parser")]
+        tree.contents[0].insert_before(expected[0], expected[1])
+        self.assertEqual(str(tree.contents[0]), "<p>Test paragraph</p>")
+        self.assertEqual(str(tree.contents[1]), "<p>Test paragraph 2</p>")
 
-    def test_insert_before_child_element(self):
+    def test_insert_before_string_multiple(self):
         tree = BeautifulSoup(self.test_tree, "html.parser")
-        expected = "<p>Test paragraph</p>"
-        tree.body.contents[0].insert_before(expected)
-        self.assertEqual(tree.body.contents[0].string, expected)
+        expected = ["<p>Test paragraph</p>", "<p>Test paragraph 2</p>"]
+        tree.body.contents[0].insert_before(expected[0], expected[1])
+        self.assertEqual(tree.body.contents[0].string, expected[0])
+        self.assertEqual(tree.body.contents[1].string, expected[1])
+
+    def test_insert_before_self_in_args(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        with self.assertRaises(ValueError):
+            tree.contents[0].insert_before(tree.contents[0])
     
     #insert_after()
     def test_insert_after_nonetype(self):
