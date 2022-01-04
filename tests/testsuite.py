@@ -78,7 +78,44 @@ class AppendClearTests(unittest.TestCase):
     soup.div.clear()
     self.assertEqual(str(soup), "<div></div>")
     self.assertEqual(len(soup.div), 0)
-    
+
+  # Test clear simple with decompose ADDITION FOR COVERAGE
+  def test_clear_simple_with_decompose_without_tag(self):
+    simple_tag = "<div>Test</div>"
+    soup = BeautifulSoup(simple_tag, 'html.parser')
+
+    #Assure tag is not empty
+    self.assertEqual(soup.div.contents, ["Test"])
+    self.assertEqual(len(soup.div.contents), 1)
+
+    #Check simple clear
+    soup.div.clear(decompose=True)
+    self.assertEqual(str(soup), "<div></div>")
+    self.assertEqual(len(soup.div), 0)
+
+    #Clear empty tag
+    soup.div.clear(decompose=True)
+    self.assertEqual(str(soup), "<div></div>")
+    self.assertEqual(len(soup.div), 0)
+
+  # Test clear simple with decompose ADDITION FOR COVERAGE
+  def test_clear_simple_with_decompose_with_tag(self):
+    simple_tag = "<div><h1>Test</h1></div>"
+    soup = BeautifulSoup(simple_tag, 'html.parser')
+
+    #Assure tag is not empty
+    self.assertEqual(soup.div.h1.contents, ["Test"])
+    self.assertEqual(len(soup.div.h1.contents), 1)
+
+    #Check simple clear
+    soup.div.clear(decompose=True)
+    self.assertEqual(str(soup), "<div></div>")
+    self.assertEqual(len(soup.div), 0)
+
+    #Clear empty tag
+    soup.div.clear(decompose=True)
+    self.assertEqual(str(soup), "<div></div>")
+    self.assertEqual(len(soup.div), 0)
     
   def test_clear_w_append(self):
     simple_tag = "<div><a>Test</a></div>"
