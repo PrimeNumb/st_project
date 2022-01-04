@@ -344,5 +344,63 @@ class TreeModificationTests(unittest.TestCase):
         tree.body.p.decompose()
         self.assertEqual(tree, expected)
 
+
+    #replace_with()
+    def test_replace_string_with_string(self):
+        tree = BeautifulSoup('<a><b>test string</b></a>', 'html.parser')
+        b = tree.b
+        tree.b.contents[0].replace_with('new string')
+        self.assertEqual(tree.decode(), '<a><b>new string</b></a>')
+    
+    def test_replace_tag(self):
+        tree = BeautifulSoup('<a><b>test</b></a>', 'html.parser')
+        b = tree.b
+        new_tag = tree.new_tag("c")
+        new_tag.string = "new string"
+        tree.b.replace_with(new_tag)
+        self.assertEqual(tree.decode(), '<a><c>new string</c></a>')
+
+    def test_replace_with_itself(self):
+        tree = BeautifulSoup('<a><b><c>test</c></b></a>', 'html.parser')
+        c = tree.c
+        tree.c.replace_with(c)
+        self.assertEqual(tree.decode(), '<a><b><c>test</c></b></a>')
+
+    def test_replace_with_parent(self):
+        tree = BeautifulSoup('<a><b></b></a>', 'html.parser')
+        with self.assertRaises(ValueError):
+            tree.b.replace_with(tree.a)
+
+    #wrap()
+    def test_wrap(self):
+        tree = BeautifulSoup('Test', 'html.parser')
+        tree.string.wrap(tree.new_tag('a'))
+        self.assertEqual(tree.decode(), '<a>Test</a>')
+        
+    def test_wrap_excisting_tag(self):
+        tree = BeautifulSoup('<a></a>Test', 'html.parser')
+        tree.a.next_sibling.wrap(tree.a)
+        self.assertEqual(tree.decode(), '<a>Test</a>')
+
+    def test_wrap_excisting_tag_keep_content(self):
+        tree = BeautifulSoup('<a>Test</a>String', 'html.parser')
+        tree.a.next_sibling.wrap(tree.a)
+        self.assertEqual(tree.decode(), '<a>TestString</a>')
+        
+    #unwrap()
+    def test_unwrap(self): 
+        tree = BeautifulSoup('<a><b>Test</b></a>', 'html.parser')
+        tree.b.unwrap()
+        self.assertEqual(tree.b, None)
+        self.assertEqual(tree.decode(), '<a>Test</a>')
+
+    def test_unwrap_return(self): 
+        tree = BeautifulSoup('<a><b><c></c></b></a>', 'html.parser')
+        a = tree.a
+        new_a = tree.a.unwrap()
+        self.assertEqual(a, new_a)
+
+    
+
 if __name__ == '__main__':
     unittest.main()
