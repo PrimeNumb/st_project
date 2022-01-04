@@ -1,7 +1,7 @@
 import unittest
 from unittest.case import expectedFailure
 import bs4
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, diagnose
 
 class AppendClearTests(unittest.TestCase):
   def test_append_empty(self):
@@ -230,6 +230,58 @@ class TreeNavigationBlackboxTest(unittest.TestCase):
         self.assertEqual(elements[3], "'This is a hyperlink to facebook!'")
         self.assertEqual(elements[4], "'\\n'")
 
+
+class BsoupFunctionsBlackboxTest(unittest.TestCase):
+
+    def test_smooth_basic(self):
+        soup = BeautifulSoup('<p>A paragraph!</p>', 'html.parser')
+        soup.p.append('Another paragraph')
+        self.assertEqual(soup.p.contents[0], 'A paragraph!')
+        self.assertEqual(soup.p.contents[1], 'Another paragraph')
+
+        soup.p.smooth()
+        self.assertEqual(soup.p.contents[0], 'A paragraph!Another paragraph')
+    
+    def test_smooth_one_element(self):
+        soup = BeautifulSoup('<h1>Useless heading 1</h1>', 'html.parser')
+        soup.h1.smooth()
+        self.assertEqual(soup.h1.contents[0], 'Useless heading 1')
+
+    def test_smooth_many(self):
+        soup = BeautifulSoup('<h1>Useless heading 1</h1>', 'html.parser')
+
+        for i in range(1000):
+            soup.h1.append(str(i))
+        
+        self.assertEqual(soup.h1.contents[1000], '999')
+        soup.h1.smooth()
+        self.assertEqual(soup.h1.contents[0][-3:], '999')
+
+    def test_get_text_basic(self):
+        soup = BeautifulSoup('<h1>Hello <i>world</i>!</h1>', 'html.parser')
+        text = soup.get_text()
+        self.assertEqual(text, 'Hello world!')
+    
+    def test_get_text_join(self):
+        soup = BeautifulSoup('<h1>Hello<i>world</i>!</h1>', 'html.parser')
+        text = soup.get_text('|')
+        self.assertEqual(text, 'Hello|world|!')
+    
+    def test_get_text_strip(self):
+        soup = BeautifulSoup('<h1> Hello <i> world </i> ! </h1>', 'html.parser') 
+        text_unstripped = soup.get_text()
+        self.assertEqual(text_unstripped, ' Hello  world  ! ')
+        text_stripped = soup.get_text(strip = True)
+        self.assertEqual(text_stripped, 'Helloworld!')
+
+    def test_get_text_stripped_strings(self):
+        soup = BeautifulSoup('<h1> Hello <i> world </i> ! </h1>', 'html.parser') 
+        res = [text for text in soup.stripped_strings]
+        
+        self.assertEqual(res[0], 'Hello')
+        self.assertEqual(res[1], 'world')
+        self.assertEqual(res[2], '!')
+
 class TreeModificationTests(unittest.TestCase):
 
     test_tree = """
@@ -401,6 +453,7 @@ class TreeModificationTests(unittest.TestCase):
         self.assertEqual(a, new_a)
 
     
+
 
 if __name__ == '__main__':
     unittest.main()
