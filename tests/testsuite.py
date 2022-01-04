@@ -3,22 +3,6 @@ from unittest.case import expectedFailure
 import bs4
 from bs4 import BeautifulSoup, diagnose
 
-class SampleTestCase(unittest.TestCase):
-
-    def test_upper(self):
-        self.assertEqual('foo'.upper(), 'FOO')
-
-    def test_isupper(self):
-        self.assertTrue('FOO'.isupper())
-        self.assertFalse('Foo'.isupper())
-
-    def test_split(self):
-        s = 'hello world'
-        self.assertEqual(s.split(), ['hello', 'world'])
-        # check that s.split fails when the separator is not a string
-        with self.assertRaises(TypeError):
-            s.split(2)
-
 class AppendClearTests(unittest.TestCase):
   def test_append_empty(self):
     simple_empty_tag = "<a></a>"
@@ -246,6 +230,7 @@ class TreeNavigationBlackboxTest(unittest.TestCase):
         self.assertEqual(elements[3], "'This is a hyperlink to facebook!'")
         self.assertEqual(elements[4], "'\\n'")
 
+
 class BsoupFunctionsBlackboxTest(unittest.TestCase):
 
     def test_smooth_basic(self):
@@ -296,6 +281,179 @@ class BsoupFunctionsBlackboxTest(unittest.TestCase):
         self.assertEqual(res[0], 'Hello')
         self.assertEqual(res[1], 'world')
         self.assertEqual(res[2], '!')
+
+class TreeModificationTests(unittest.TestCase):
+
+    test_tree = """
+    <html><head><title>Title text</title></head>
+    <body>
+    <p class="p_class1"></p>
+    <p class="p_class2"></p>
+    <a href="https://www.google.com/">Google link></a>
+    </body>
+    """
+
+    # insert()
+    def test_insert_empty_into_invalid_index(self):
+        empty_tree = BeautifulSoup("", "html.parser")
+        with self.assertRaises(IndexError):
+            empty_tree.insert(-1, "")
+
+    def test_insert_empty_into_valid_index(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        expected = BeautifulSoup(self.test_tree, "html.parser").string
+        tree.insert(0, "")
+        self.assertEqual(tree.string, expected)
+    
+    def test_insert_nonetype(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        with self.assertRaises(ValueError):
+            tree.insert(0, None)
+
+    def test_insert_parent_element(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        expected_contents = "abc123"
+        tree.insert(0, expected_contents)
+        self.assertEqual(tree.contents[0], expected_contents)
+    
+    def test_insert_child_element(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        expected_contents = "abc123"
+        tree.body.insert(0, expected_contents)
+        self.assertEqual(tree.body.contents[0], expected_contents)
+
+    #insert_before()
+    def test_insert_before_nonetype(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        with self.assertRaises(ValueError):
+            tree.contents[0].insert_before(None)
+
+    def test_insert_before_empty_insert(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        expected = BeautifulSoup(self.test_tree, "html.parser")
+        tree.contents[0].insert_before("")
+        self.assertEqual(tree.prettify(), expected.prettify())
+
+    def test_insert_before_parent_element(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        expected = "<p>Test paragraph</p>"
+        tree.contents[0].insert_before(expected)
+        self.assertEqual(tree.contents[0].string, expected)
+
+    def test_insert_before_child_element(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        expected = "<p>Test paragraph</p>"
+        tree.body.contents[0].insert_before(expected)
+        self.assertEqual(tree.body.contents[0].string, expected)
+    
+    #insert_after()
+    def test_insert_after_nonetype(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        with self.assertRaises(ValueError):
+            tree.contents[0].insert_after(None)
+
+    def test_insert_after_empty_insert(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        expected = BeautifulSoup(self.test_tree, "html.parser")
+        tree.contents[0].insert_after("")
+        self.assertEqual(tree.prettify(), expected.prettify()) #parses to same HTML output
+
+    def test_insert_after_parent_element(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        expected = "<p>Test paragraph</p>"
+        tree.contents[0].insert_after(expected)
+        self.assertEqual(tree.contents[1].string, expected)
+
+    def test_insert_after_child_element(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        expected = "<p>Test paragraph</p>"
+        tree.body.contents[0].insert_after(expected)
+        self.assertEqual(tree.body.contents[1].string, expected)
+
+    #extract()
+    def test_extract_empty_tree(self):
+        empty_tree = BeautifulSoup("", "html.parser")
+        self.assertEqual(empty_tree.extract(), empty_tree)
+    
+    def test_extract_populated_tree(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        expected = BeautifulSoup('<p class="p_class1"></p>', "html.parser")
+        returned = tree.body.p.extract()
+        self.assertEqual(expected.contents[0], returned)
+
+    #decompose()
+    def test_decompose_empty_tree(self):
+        empty_tree = BeautifulSoup("", "html.parser")
+        expected = BeautifulSoup("", "html.parser")
+        empty_tree.decompose()
+        # behavior of a decomposed element is undefined according to the documentation,
+        # hence why we check the 'decomposed' property instead
+        self.assertTrue(empty_tree.decomposed)
+    
+    def test_decompose_child_element(self):
+        tree = BeautifulSoup("<body><p>Paragraph contents</p></body>", "html.parser")
+        expected = BeautifulSoup("<body></body>", "html.parser")
+        tree.body.p.decompose()
+        self.assertEqual(tree, expected)
+
+
+    #replace_with()
+    def test_replace_string_with_string(self):
+        tree = BeautifulSoup('<a><b>test string</b></a>', 'html.parser')
+        b = tree.b
+        tree.b.contents[0].replace_with('new string')
+        self.assertEqual(tree.decode(), '<a><b>new string</b></a>')
+    
+    def test_replace_tag(self):
+        tree = BeautifulSoup('<a><b>test</b></a>', 'html.parser')
+        b = tree.b
+        new_tag = tree.new_tag("c")
+        new_tag.string = "new string"
+        tree.b.replace_with(new_tag)
+        self.assertEqual(tree.decode(), '<a><c>new string</c></a>')
+
+    def test_replace_with_itself(self):
+        tree = BeautifulSoup('<a><b><c>test</c></b></a>', 'html.parser')
+        c = tree.c
+        tree.c.replace_with(c)
+        self.assertEqual(tree.decode(), '<a><b><c>test</c></b></a>')
+
+    def test_replace_with_parent(self):
+        tree = BeautifulSoup('<a><b></b></a>', 'html.parser')
+        with self.assertRaises(ValueError):
+            tree.b.replace_with(tree.a)
+
+    #wrap()
+    def test_wrap(self):
+        tree = BeautifulSoup('Test', 'html.parser')
+        tree.string.wrap(tree.new_tag('a'))
+        self.assertEqual(tree.decode(), '<a>Test</a>')
+        
+    def test_wrap_excisting_tag(self):
+        tree = BeautifulSoup('<a></a>Test', 'html.parser')
+        tree.a.next_sibling.wrap(tree.a)
+        self.assertEqual(tree.decode(), '<a>Test</a>')
+
+    def test_wrap_excisting_tag_keep_content(self):
+        tree = BeautifulSoup('<a>Test</a>String', 'html.parser')
+        tree.a.next_sibling.wrap(tree.a)
+        self.assertEqual(tree.decode(), '<a>TestString</a>')
+        
+    #unwrap()
+    def test_unwrap(self): 
+        tree = BeautifulSoup('<a><b>Test</b></a>', 'html.parser')
+        tree.b.unwrap()
+        self.assertEqual(tree.b, None)
+        self.assertEqual(tree.decode(), '<a>Test</a>')
+
+    def test_unwrap_return(self): 
+        tree = BeautifulSoup('<a><b><c></c></b></a>', 'html.parser')
+        a = tree.a
+        new_a = tree.a.unwrap()
+        self.assertEqual(a, new_a)
+
+    
+
 
 if __name__ == '__main__':
     unittest.main()
