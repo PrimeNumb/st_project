@@ -560,6 +560,19 @@ class TreeFindTest(unittest.TestCase):
 
         self.assertEqual(str(aside[0]), '<aside:colon>Hello, World!</aside:colon>')
 
+    # Test non recursive call ADDITION FOR COVERAGE
+    def test_find_all_non_recursive(self):
+        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
+        links = soup.find_all('a', recursive=False)
+        expected_links = [
+            '<a href="https://www.wikipedia.org/">This is a hyperlink to wikipedia!</a>',
+            '<a href="https://www.facebook.com/">This is a hyperlink to facebook!</a>',
+            '<a href="https://creativecommons.org/">Site goes under Creative Commons</a>'
+        ]
+
+        for (i, link) in enumerate(links):
+            self.assertTrue(i < 3)
+            self.assertEqual(str(link), expected_links[i])
 
     # Test find parent to find an object's parent
     def test_find_parent(self):
