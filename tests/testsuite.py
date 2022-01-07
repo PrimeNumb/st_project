@@ -322,31 +322,7 @@ class TreeModificationTests(unittest.TestCase):
         tree.body.insert(0, expected_contents)
         self.assertEqual(tree.body.contents[0], expected_contents)
     
-    #insert_after()
-    def test_insert_after_nonetype(self):
-        tree = BeautifulSoup(self.test_tree, "html.parser")
-        with self.assertRaises(ValueError):
-            tree.contents[0].insert_after(None)
-
-    def test_insert_after_empty_insert(self):
-        tree = BeautifulSoup(self.test_tree, "html.parser")
-        expected = BeautifulSoup(self.test_tree, "html.parser")
-        tree.contents[0].insert_after("")
-        self.assertEqual(tree.prettify(), expected.prettify()) #parses to same HTML output
-
-    def test_insert_after_parent_element(self):
-        tree = BeautifulSoup(self.test_tree, "html.parser")
-        expected = "<p>Test paragraph</p>"
-        tree.contents[0].insert_after(expected)
-        self.assertEqual(tree.contents[1].string, expected)
-
-    def test_insert_after_child_element(self):
-        tree = BeautifulSoup(self.test_tree, "html.parser")
-        expected = "<p>Test paragraph</p>"
-        tree.body.contents[0].insert_after(expected)
-        self.assertEqual(tree.body.contents[1].string, expected)
-
-    #extract()
+        #extract()
     def test_extract_empty_tree(self):
         empty_tree = BeautifulSoup("", "html.parser")
         self.assertEqual(empty_tree.extract(), empty_tree)
@@ -462,9 +438,6 @@ class TreeFindTest(unittest.TestCase):
     def test_find_nested(self):
         soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
         img_src = soup.find(id='main_tag').find("img")['src']
-
-        print(img_src)
-        
         self.assertEqual(img_src, 'https://www.python.org/static/community_logos/python-logo.png')
 
     # Test find a single object but it doesn't exist one
@@ -692,12 +665,14 @@ class WhiteBoxTesting(unittest.TestCase):
     #insert_before()
     def test_insert_before_nonetype(self):
         tree = BeautifulSoup(self.test_tree, "html.parser")
+        #Ensure inserting None raises ValueError
         with self.assertRaises(ValueError):
             tree.contents[0].insert_before(None)
 
     def test_insert_before_empty_insert(self):
         tree = BeautifulSoup(self.test_tree, "html.parser")
         expected = BeautifulSoup(self.test_tree, "html.parser")
+        #Assure inserting nothing results in the same tree
         tree.contents[0].insert_before()
         self.assertEqual(tree.prettify(), expected.prettify())
 
@@ -719,6 +694,45 @@ class WhiteBoxTesting(unittest.TestCase):
         tree = BeautifulSoup(self.test_tree, "html.parser")
         with self.assertRaises(ValueError):
             tree.contents[0].insert_before(tree.contents[0])
+
+    #insert_after()
+    def test_insert_after_nonetype(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        #Ensure inserting None raises ValueError
+        with self.assertRaises(ValueError):
+            tree.contents[0].insert_after(None)
+
+    def test_insert_after_empty_insert(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        expected = BeautifulSoup(self.test_tree, "html.parser")
+
+        #Assure inserting nothing results in the same tree
+        tree.contents[0].insert_after()
+        self.assertEqual(tree.prettify(), expected.prettify())
+
+    def test_insert_after_PageElement_multiple(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        expected = [BeautifulSoup("<p>Test paragraph</p>", "html.parser"), BeautifulSoup("<p>Test paragraph 2</p>", "html.parser")]
+        tree.body.contents[0].insert_after(expected[0], expected[1])
+
+        #Assure inserting objects of types PageElement results in the object s being inserted AFTER the specified index
+        self.assertEqual(str(tree.body.contents[1]), "<p>Test paragraph</p>")
+        self.assertEqual(str(tree.body.contents[2]), "<p>Test paragraph 2</p>")
+
+    def test_insert_after_string_multiple(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        expected = ["<p>Test paragraph</p>", "<p>Test paragraph 2</p>"]
+        tree.body.contents[0].insert_after(expected[0], expected[1])
+
+        #Assure inserting objects of types PageElement results in the object s being inserted AFTER the specified index
+        self.assertEqual(tree.body.contents[1].string, expected[0])
+        self.assertEqual(tree.body.contents[2].string, expected[1])
+
+    def test_insert_after_self_in_args(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        #Assure ValueError is raised when trying to insert into itself
+        with self.assertRaises(ValueError):
+            tree.contents[0].insert_after(tree.contents[0])
 
 if __name__ == '__main__':
     unittest.main()
