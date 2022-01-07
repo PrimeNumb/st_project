@@ -530,7 +530,7 @@ class TreeFindTest(unittest.TestCase):
             self.assertEqual(str(sibling), expected_siblings[i])
 
     # Test find siblings of an object - empty
-    def test_find_next_siblings(self):
+    def test_find_next_siblings_empty(self):
         soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
         title = soup.find('title')
         siblings = title.find_next_siblings("meta")
