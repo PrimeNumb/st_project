@@ -1,7 +1,7 @@
 import unittest
 from unittest.case import expectedFailure
 import bs4
-from bs4 import BeautifulSoup, diagnose, SoupStrainer
+from bs4 import BeautifulSoup, diagnose, SoupStrainer, Comment
 
 class AppendClearTests(unittest.TestCase):
   def test_append_empty(self):
@@ -537,6 +537,10 @@ class TreeFindTest(unittest.TestCase):
 
         self.assertTrue(len(siblings) == 0)
 
+
+#
+# Class containing all white box tests
+#
 class WhiteBoxTesting(unittest.TestCase):
     html_text_gabe = """
     <html>
@@ -568,6 +572,10 @@ class WhiteBoxTesting(unittest.TestCase):
     </body>
     </html>
     """
+
+    #
+    # WHITE BOX tests for - clear()
+    #
 
     # Test clear simple with decompose
     def test_clear_simple_with_decompose_without_tag(self):
@@ -606,6 +614,10 @@ class WhiteBoxTesting(unittest.TestCase):
         soup.div.clear(decompose=True)
         self.assertEqual(str(soup), "<div></div>")
         self.assertEqual(len(soup.div), 0)
+    
+    #
+    # WHITE BOX tests for - find_all()
+    #
 
     #Test find all with limit
     def test_find_all_limit(self):
@@ -662,7 +674,10 @@ class WhiteBoxTesting(unittest.TestCase):
             self.assertTrue(i < 3)
             self.assertEqual(str(link), expected_links[i])
 
-    #insert_before()
+    #
+    # WHITE BOX tests for - insert_before()
+    #
+
     def test_insert_before_nonetype(self):
         tree = BeautifulSoup(self.test_tree, "html.parser")
         #Ensure inserting None raises ValueError
@@ -694,6 +709,50 @@ class WhiteBoxTesting(unittest.TestCase):
         tree = BeautifulSoup(self.test_tree, "html.parser")
         with self.assertRaises(ValueError):
             tree.contents[0].insert_before(tree.contents[0])
+
+
+    #
+    # WHITE BOX tests for - insert()
+    #
+
+    # Test for inserting tag into itself
+    def test_insert_into_itself(self):
+        simple_tag = "<div></div>"
+        soup = BeautifulSoup(simple_tag, 'html.parser')
+
+        with self.assertRaises(ValueError):
+            soup.insert(0, soup)
+
+    # Test for inserting tag at index lower than tag index
+    def test_insert_at_lower_index(self):
+        simple_tag = "<div><h1></h1><h2></h2><h3></h3></div>"
+        soup = BeautifulSoup(simple_tag, 'html.parser')
+
+        soup.div.insert(1, soup.h3)
+        self.assertEqual("<div><h1></h1><h3></h3><h2></h2></div>", soup.decode())
+
+    #
+    # WHITE BOX tests for - smooth()
+    #
+
+    # Test smoothing recursively which means an element is a tag
+    def test_smooth_is_tag(self):
+        simple_tag = "<div><h1>Title</h1></div>"
+        soup = BeautifulSoup(simple_tag, 'html.parser')
+        soup.h1.append("Hej, jag heter Patrik")
+        soup.div.smooth()
+
+        self.assertEqual(soup.h1.contents[0], "TitleHej, jag heter Patrik")
+
+    # Test content is not a NavigableString which means it will not get smoothed
+    def test_smooth_not_navigable_string(self):
+        simple_tag = "<div><h1>Title</h1></div>"
+        soup = BeautifulSoup(simple_tag, 'html.parser')
+        soup.h1.append("Hej, jag heter Patrik")
+        soup.h1.append(Comment("Hello"))
+        soup.div.smooth()
+
+        self.assertEqual(soup.h1.contents[0], "TitleHej, jag heter Patrik")
 
     #insert_after()
     def test_insert_after_nonetype(self):
@@ -733,6 +792,7 @@ class WhiteBoxTesting(unittest.TestCase):
         #Assure ValueError is raised when trying to insert into itself
         with self.assertRaises(ValueError):
             tree.contents[0].insert_after(tree.contents[0])
+
 
 if __name__ == '__main__':
     unittest.main()
