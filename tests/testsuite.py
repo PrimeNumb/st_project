@@ -78,44 +78,6 @@ class AppendClearTests(unittest.TestCase):
     soup.div.clear()
     self.assertEqual(str(soup), "<div></div>")
     self.assertEqual(len(soup.div), 0)
-
-  # Test clear simple with decompose ADDITION FOR COVERAGE
-  def test_clear_simple_with_decompose_without_tag(self):
-    simple_tag = "<div>Test</div>"
-    soup = BeautifulSoup(simple_tag, 'html.parser')
-
-    #Assure tag is not empty
-    self.assertEqual(soup.div.contents, ["Test"])
-    self.assertEqual(len(soup.div.contents), 1)
-
-    #Check simple clear
-    soup.div.clear(decompose=True)
-    self.assertEqual(str(soup), "<div></div>")
-    self.assertEqual(len(soup.div), 0)
-
-    #Clear empty tag
-    soup.div.clear(decompose=True)
-    self.assertEqual(str(soup), "<div></div>")
-    self.assertEqual(len(soup.div), 0)
-
-  # Test clear simple with decompose ADDITION FOR COVERAGE
-  def test_clear_simple_with_decompose_with_tag(self):
-    simple_tag = "<div><h1>Test</h1></div>"
-    soup = BeautifulSoup(simple_tag, 'html.parser')
-
-    #Assure tag is not empty
-    self.assertEqual(soup.div.h1.contents, ["Test"])
-    self.assertEqual(len(soup.div.h1.contents), 1)
-
-    #Check simple clear
-    soup.div.clear(decompose=True)
-    self.assertEqual(str(soup), "<div></div>")
-    self.assertEqual(len(soup.div), 0)
-
-    #Clear empty tag
-    soup.div.clear(decompose=True)
-    self.assertEqual(str(soup), "<div></div>")
-    self.assertEqual(len(soup.div), 0)
     
   def test_clear_w_append(self):
     simple_tag = "<div><a>Test</a></div>"
@@ -359,63 +321,8 @@ class TreeModificationTests(unittest.TestCase):
         expected_contents = "abc123"
         tree.body.insert(0, expected_contents)
         self.assertEqual(tree.body.contents[0], expected_contents)
-
-    #insert_before()
-    def test_insert_before_nonetype(self):
-        tree = BeautifulSoup(self.test_tree, "html.parser")
-        with self.assertRaises(ValueError):
-            tree.contents[0].insert_before(None)
-
-    def test_insert_before_empty_insert(self):
-        tree = BeautifulSoup(self.test_tree, "html.parser")
-        expected = BeautifulSoup(self.test_tree, "html.parser")
-        tree.contents[0].insert_before()
-        self.assertEqual(tree.prettify(), expected.prettify())
-
-    def test_insert_before_PageElement_multiple(self):
-        tree = BeautifulSoup(self.test_tree, "html.parser")
-        expected = [BeautifulSoup("<p>Test paragraph</p>", "html.parser"), BeautifulSoup("<p>Test paragraph 2</p>", "html.parser")]
-        tree.contents[0].insert_before(expected[0], expected[1])
-        self.assertEqual(str(tree.contents[0]), "<p>Test paragraph</p>")
-        self.assertEqual(str(tree.contents[1]), "<p>Test paragraph 2</p>")
-
-    def test_insert_before_string_multiple(self):
-        tree = BeautifulSoup(self.test_tree, "html.parser")
-        expected = ["<p>Test paragraph</p>", "<p>Test paragraph 2</p>"]
-        tree.body.contents[0].insert_before(expected[0], expected[1])
-        self.assertEqual(tree.body.contents[0].string, expected[0])
-        self.assertEqual(tree.body.contents[1].string, expected[1])
-
-    def test_insert_before_self_in_args(self):
-        tree = BeautifulSoup(self.test_tree, "html.parser")
-        with self.assertRaises(ValueError):
-            tree.contents[0].insert_before(tree.contents[0])
     
-    #insert_after()
-    def test_insert_after_nonetype(self):
-        tree = BeautifulSoup(self.test_tree, "html.parser")
-        with self.assertRaises(ValueError):
-            tree.contents[0].insert_after(None)
-
-    def test_insert_after_empty_insert(self):
-        tree = BeautifulSoup(self.test_tree, "html.parser")
-        expected = BeautifulSoup(self.test_tree, "html.parser")
-        tree.contents[0].insert_after("")
-        self.assertEqual(tree.prettify(), expected.prettify()) #parses to same HTML output
-
-    def test_insert_after_parent_element(self):
-        tree = BeautifulSoup(self.test_tree, "html.parser")
-        expected = "<p>Test paragraph</p>"
-        tree.contents[0].insert_after(expected)
-        self.assertEqual(tree.contents[1].string, expected)
-
-    def test_insert_after_child_element(self):
-        tree = BeautifulSoup(self.test_tree, "html.parser")
-        expected = "<p>Test paragraph</p>"
-        tree.body.contents[0].insert_after(expected)
-        self.assertEqual(tree.body.contents[1].string, expected)
-
-    #extract()
+        #extract()
     def test_extract_empty_tree(self):
         empty_tree = BeautifulSoup("", "html.parser")
         self.assertEqual(empty_tree.extract(), empty_tree)
@@ -531,9 +438,6 @@ class TreeFindTest(unittest.TestCase):
     def test_find_nested(self):
         soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
         img_src = soup.find(id='main_tag').find("img")['src']
-
-        print(img_src)
-        
         self.assertEqual(img_src, 'https://www.python.org/static/community_logos/python-logo.png')
 
     # Test find a single object but it doesn't exist one
@@ -563,61 +467,6 @@ class TreeFindTest(unittest.TestCase):
         li = soup.find_all('li')
 
         self.assertTrue(len(li) == 0)
- 
-    #Test find all with limit ADDITION FOR COVERAGE
-    def test_find_all_limit(self):
-        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
-        links = soup.find_all('a', limit=2)
-        expected_links = [
-            '<a href="https://www.wikipedia.org/">This is a hyperlink to wikipedia!</a>',
-            '<a href="https://www.facebook.com/">This is a hyperlink to facebook!</a>'
-        ]
-        
-        for (i, link) in enumerate(links):
-            self.assertTrue(i < 2)
-            self.assertEqual(str(link), expected_links[i])
-
-    # Test SoupStrainer ADDITION FOR COVERAGE
-    def test_find_all_soup_strainer(self):
-        only_a_tags = SoupStrainer('a')
-        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
-        links = soup.find_all(only_a_tags)
-        expected_links = [
-            '<a href="https://www.wikipedia.org/">This is a hyperlink to wikipedia!</a>',
-            '<a href="https://www.facebook.com/">This is a hyperlink to facebook!</a>',
-            '<a href="https://creativecommons.org/">Site goes under Creative Commons</a>'
-        ]
-        
-        for (i, link) in enumerate(links):
-            self.assertTrue(i < 3)
-            self.assertEqual(str(link), expected_links[i])
-
-    # Test name ADDITION FOR COVERAGE
-    def test_find_all_name(self):
-        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
-        links = soup.find_all(True)
-        self.assertIsNotNone(links)
-
-    # Test colon name ADDITION FOR COVERAGE
-    def test_find_all_colon_name(self):
-        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
-        aside = soup.find_all('aside:colon')
-
-        self.assertEqual(str(aside[0]), '<aside:colon>Hello, World!</aside:colon>')
-
-    # Test non recursive call ADDITION FOR COVERAGE
-    def test_find_all_non_recursive(self):
-        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
-        links = soup.find_all('a', recursive=False)
-        expected_links = [
-            '<a href="https://www.wikipedia.org/">This is a hyperlink to wikipedia!</a>',
-            '<a href="https://www.facebook.com/">This is a hyperlink to facebook!</a>',
-            '<a href="https://creativecommons.org/">Site goes under Creative Commons</a>'
-        ]
-
-        for (i, link) in enumerate(links):
-            self.assertTrue(i < 3)
-            self.assertEqual(str(link), expected_links[i])
 
     # Test find parent to find an object's parent
     def test_find_parent(self):
@@ -687,6 +536,203 @@ class TreeFindTest(unittest.TestCase):
         siblings = title.find_next_siblings("meta")
 
         self.assertTrue(len(siblings) == 0)
+
+class WhiteBoxTesting(unittest.TestCase):
+    html_text_gabe = """
+    <html>
+    <head>
+        <title>The test title</title>
+    </head>
+    <body>
+        <p>This is a paragraph.</p>
+        <p>This is a paragraph with hyperlinks
+            <a href="https://www.wikipedia.org/">This is a hyperlink to wikipedia!</a>
+            <a href="https://www.facebook.com/">This is a hyperlink to facebook!</a>
+        </p>
+        <div id="test_id">Find me!</div>
+        <main id="main_tag">
+            <img src="https://www.python.org/static/community_logos/python-logo.png" width="200px" height="130px" />
+        </main>
+        <a href="https://creativecommons.org/">Site goes under Creative Commons</a>
+        <aside:colon>Hello, World!</aside:colon>
+    </body>
+    </html>
+    """
+
+    test_tree = """
+    <html><head><title>Title text</title></head>
+    <body>
+    <p class="p_class1"></p>
+    <p class="p_class2"></p>
+    <a href="https://www.google.com/">Google link></a>
+    </body>
+    </html>
+    """
+
+    # Test clear simple with decompose
+    def test_clear_simple_with_decompose_without_tag(self):
+        simple_tag = "<div>Test</div>"
+        soup = BeautifulSoup(simple_tag, 'html.parser')
+
+        #Assure tag is not empty
+        self.assertEqual(soup.div.contents, ["Test"])
+        self.assertEqual(len(soup.div.contents), 1)
+
+        #Check simple clear
+        soup.div.clear(decompose=True)
+        self.assertEqual(str(soup), "<div></div>")
+        self.assertEqual(len(soup.div), 0)
+
+        #Clear empty tag
+        soup.div.clear(decompose=True)
+        self.assertEqual(str(soup), "<div></div>")
+        self.assertEqual(len(soup.div), 0)
+
+    # Test clear simple with decompose
+    def test_clear_simple_with_decompose_with_tag(self):
+        simple_tag = "<div><h1>Test</h1></div>"
+        soup = BeautifulSoup(simple_tag, 'html.parser')
+
+        #Assure tag is not empty
+        self.assertEqual(soup.div.h1.contents, ["Test"])
+        self.assertEqual(len(soup.div.h1.contents), 1)
+
+        #Check simple clear
+        soup.div.clear(decompose=True)
+        self.assertEqual(str(soup), "<div></div>")
+        self.assertEqual(len(soup.div), 0)
+
+        #Clear empty tag
+        soup.div.clear(decompose=True)
+        self.assertEqual(str(soup), "<div></div>")
+        self.assertEqual(len(soup.div), 0)
+
+    #Test find all with limit
+    def test_find_all_limit(self):
+        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
+        links = soup.find_all('a', limit=2)
+        expected_links = [
+            '<a href="https://www.wikipedia.org/">This is a hyperlink to wikipedia!</a>',
+            '<a href="https://www.facebook.com/">This is a hyperlink to facebook!</a>'
+        ]
+        
+        for (i, link) in enumerate(links):
+            self.assertTrue(i < 2)
+            self.assertEqual(str(link), expected_links[i])
+
+    # Test SoupStrainer
+    def test_find_all_soup_strainer(self):
+        only_a_tags = SoupStrainer('a')
+        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
+        links = soup.find_all(only_a_tags)
+        expected_links = [
+            '<a href="https://www.wikipedia.org/">This is a hyperlink to wikipedia!</a>',
+            '<a href="https://www.facebook.com/">This is a hyperlink to facebook!</a>',
+            '<a href="https://creativecommons.org/">Site goes under Creative Commons</a>'
+        ]
+        
+        for (i, link) in enumerate(links):
+            self.assertTrue(i < 3)
+            self.assertEqual(str(link), expected_links[i])
+
+    # Test name
+    def test_find_all_name(self):
+        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
+        links = soup.find_all(True)
+        self.assertIsNotNone(links)
+
+    # Test colon name
+    def test_find_all_colon_name(self):
+        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
+        aside = soup.find_all('aside:colon')
+
+        self.assertEqual(str(aside[0]), '<aside:colon>Hello, World!</aside:colon>')
+
+    # Test non recursive call
+    def test_find_all_non_recursive(self):
+        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
+        links = soup.find_all('a', recursive=False)
+        expected_links = [
+            '<a href="https://www.wikipedia.org/">This is a hyperlink to wikipedia!</a>',
+            '<a href="https://www.facebook.com/">This is a hyperlink to facebook!</a>',
+            '<a href="https://creativecommons.org/">Site goes under Creative Commons</a>'
+        ]
+
+        for (i, link) in enumerate(links):
+            self.assertTrue(i < 3)
+            self.assertEqual(str(link), expected_links[i])
+
+    #insert_before()
+    def test_insert_before_nonetype(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        #Ensure inserting None raises ValueError
+        with self.assertRaises(ValueError):
+            tree.contents[0].insert_before(None)
+
+    def test_insert_before_empty_insert(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        expected = BeautifulSoup(self.test_tree, "html.parser")
+        #Assure inserting nothing results in the same tree
+        tree.contents[0].insert_before()
+        self.assertEqual(tree.prettify(), expected.prettify())
+
+    def test_insert_before_PageElement_multiple(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        expected = [BeautifulSoup("<p>Test paragraph</p>", "html.parser"), BeautifulSoup("<p>Test paragraph 2</p>", "html.parser")]
+        tree.contents[0].insert_before(expected[0], expected[1])
+        self.assertEqual(str(tree.contents[0]), "<p>Test paragraph</p>")
+        self.assertEqual(str(tree.contents[1]), "<p>Test paragraph 2</p>")
+
+    def test_insert_before_string_multiple(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        expected = ["<p>Test paragraph</p>", "<p>Test paragraph 2</p>"]
+        tree.body.contents[0].insert_before(expected[0], expected[1])
+        self.assertEqual(tree.body.contents[0].string, expected[0])
+        self.assertEqual(tree.body.contents[1].string, expected[1])
+
+    def test_insert_before_self_in_args(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        with self.assertRaises(ValueError):
+            tree.contents[0].insert_before(tree.contents[0])
+
+    #insert_after()
+    def test_insert_after_nonetype(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        #Ensure inserting None raises ValueError
+        with self.assertRaises(ValueError):
+            tree.contents[0].insert_after(None)
+
+    def test_insert_after_empty_insert(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        expected = BeautifulSoup(self.test_tree, "html.parser")
+
+        #Assure inserting nothing results in the same tree
+        tree.contents[0].insert_after()
+        self.assertEqual(tree.prettify(), expected.prettify())
+
+    def test_insert_after_PageElement_multiple(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        expected = [BeautifulSoup("<p>Test paragraph</p>", "html.parser"), BeautifulSoup("<p>Test paragraph 2</p>", "html.parser")]
+        tree.body.contents[0].insert_after(expected[0], expected[1])
+
+        #Assure inserting objects of types PageElement results in the object s being inserted AFTER the specified index
+        self.assertEqual(str(tree.body.contents[1]), "<p>Test paragraph</p>")
+        self.assertEqual(str(tree.body.contents[2]), "<p>Test paragraph 2</p>")
+
+    def test_insert_after_string_multiple(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        expected = ["<p>Test paragraph</p>", "<p>Test paragraph 2</p>"]
+        tree.body.contents[0].insert_after(expected[0], expected[1])
+
+        #Assure inserting objects of types PageElement results in the object s being inserted AFTER the specified index
+        self.assertEqual(tree.body.contents[1].string, expected[0])
+        self.assertEqual(tree.body.contents[2].string, expected[1])
+
+    def test_insert_after_self_in_args(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        #Assure ValueError is raised when trying to insert into itself
+        with self.assertRaises(ValueError):
+            tree.contents[0].insert_after(tree.contents[0])
 
 if __name__ == '__main__':
     unittest.main()
