@@ -78,44 +78,6 @@ class AppendClearTests(unittest.TestCase):
     soup.div.clear()
     self.assertEqual(str(soup), "<div></div>")
     self.assertEqual(len(soup.div), 0)
-
-  # Test clear simple with decompose ADDITION FOR COVERAGE
-  def test_clear_simple_with_decompose_without_tag(self):
-    simple_tag = "<div>Test</div>"
-    soup = BeautifulSoup(simple_tag, 'html.parser')
-
-    #Assure tag is not empty
-    self.assertEqual(soup.div.contents, ["Test"])
-    self.assertEqual(len(soup.div.contents), 1)
-
-    #Check simple clear
-    soup.div.clear(decompose=True)
-    self.assertEqual(str(soup), "<div></div>")
-    self.assertEqual(len(soup.div), 0)
-
-    #Clear empty tag
-    soup.div.clear(decompose=True)
-    self.assertEqual(str(soup), "<div></div>")
-    self.assertEqual(len(soup.div), 0)
-
-  # Test clear simple with decompose ADDITION FOR COVERAGE
-  def test_clear_simple_with_decompose_with_tag(self):
-    simple_tag = "<div><h1>Test</h1></div>"
-    soup = BeautifulSoup(simple_tag, 'html.parser')
-
-    #Assure tag is not empty
-    self.assertEqual(soup.div.h1.contents, ["Test"])
-    self.assertEqual(len(soup.div.h1.contents), 1)
-
-    #Check simple clear
-    soup.div.clear(decompose=True)
-    self.assertEqual(str(soup), "<div></div>")
-    self.assertEqual(len(soup.div), 0)
-
-    #Clear empty tag
-    soup.div.clear(decompose=True)
-    self.assertEqual(str(soup), "<div></div>")
-    self.assertEqual(len(soup.div), 0)
     
   def test_clear_w_append(self):
     simple_tag = "<div><a>Test</a></div>"
@@ -555,61 +517,6 @@ class TreeFindTest(unittest.TestCase):
         li = soup.find_all('li')
 
         self.assertTrue(len(li) == 0)
- 
-    #Test find all with limit ADDITION FOR COVERAGE
-    def test_find_all_limit(self):
-        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
-        links = soup.find_all('a', limit=2)
-        expected_links = [
-            '<a href="https://www.wikipedia.org/">This is a hyperlink to wikipedia!</a>',
-            '<a href="https://www.facebook.com/">This is a hyperlink to facebook!</a>'
-        ]
-        
-        for (i, link) in enumerate(links):
-            self.assertTrue(i < 2)
-            self.assertEqual(str(link), expected_links[i])
-
-    # Test SoupStrainer ADDITION FOR COVERAGE
-    def test_find_all_soup_strainer(self):
-        only_a_tags = SoupStrainer('a')
-        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
-        links = soup.find_all(only_a_tags)
-        expected_links = [
-            '<a href="https://www.wikipedia.org/">This is a hyperlink to wikipedia!</a>',
-            '<a href="https://www.facebook.com/">This is a hyperlink to facebook!</a>',
-            '<a href="https://creativecommons.org/">Site goes under Creative Commons</a>'
-        ]
-        
-        for (i, link) in enumerate(links):
-            self.assertTrue(i < 3)
-            self.assertEqual(str(link), expected_links[i])
-
-    # Test name ADDITION FOR COVERAGE
-    def test_find_all_name(self):
-        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
-        links = soup.find_all(True)
-        self.assertIsNotNone(links)
-
-    # Test colon name ADDITION FOR COVERAGE
-    def test_find_all_colon_name(self):
-        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
-        aside = soup.find_all('aside:colon')
-
-        self.assertEqual(str(aside[0]), '<aside:colon>Hello, World!</aside:colon>')
-
-    # Test non recursive call ADDITION FOR COVERAGE
-    def test_find_all_non_recursive(self):
-        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
-        links = soup.find_all('a', recursive=False)
-        expected_links = [
-            '<a href="https://www.wikipedia.org/">This is a hyperlink to wikipedia!</a>',
-            '<a href="https://www.facebook.com/">This is a hyperlink to facebook!</a>',
-            '<a href="https://creativecommons.org/">Site goes under Creative Commons</a>'
-        ]
-
-        for (i, link) in enumerate(links):
-            self.assertTrue(i < 3)
-            self.assertEqual(str(link), expected_links[i])
 
     # Test find parent to find an object's parent
     def test_find_parent(self):
@@ -679,6 +586,101 @@ class TreeFindTest(unittest.TestCase):
         siblings = title.find_next_siblings("meta")
 
         self.assertTrue(len(siblings) == 0)
+
+class WhiteBoxTesting:
+    # Test clear simple with decompose
+    def test_clear_simple_with_decompose_without_tag(self):
+        simple_tag = "<div>Test</div>"
+        soup = BeautifulSoup(simple_tag, 'html.parser')
+
+        #Assure tag is not empty
+        self.assertEqual(soup.div.contents, ["Test"])
+        self.assertEqual(len(soup.div.contents), 1)
+
+        #Check simple clear
+        soup.div.clear(decompose=True)
+        self.assertEqual(str(soup), "<div></div>")
+        self.assertEqual(len(soup.div), 0)
+
+        #Clear empty tag
+        soup.div.clear(decompose=True)
+        self.assertEqual(str(soup), "<div></div>")
+        self.assertEqual(len(soup.div), 0)
+
+    # Test clear simple with decompose
+    def test_clear_simple_with_decompose_with_tag(self):
+        simple_tag = "<div><h1>Test</h1></div>"
+        soup = BeautifulSoup(simple_tag, 'html.parser')
+
+        #Assure tag is not empty
+        self.assertEqual(soup.div.h1.contents, ["Test"])
+        self.assertEqual(len(soup.div.h1.contents), 1)
+
+        #Check simple clear
+        soup.div.clear(decompose=True)
+        self.assertEqual(str(soup), "<div></div>")
+        self.assertEqual(len(soup.div), 0)
+
+        #Clear empty tag
+        soup.div.clear(decompose=True)
+        self.assertEqual(str(soup), "<div></div>")
+        self.assertEqual(len(soup.div), 0)
+
+    #Test find all with limit
+    def test_find_all_limit(self):
+        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
+        links = soup.find_all('a', limit=2)
+        expected_links = [
+            '<a href="https://www.wikipedia.org/">This is a hyperlink to wikipedia!</a>',
+            '<a href="https://www.facebook.com/">This is a hyperlink to facebook!</a>'
+        ]
+        
+        for (i, link) in enumerate(links):
+            self.assertTrue(i < 2)
+            self.assertEqual(str(link), expected_links[i])
+
+    # Test SoupStrainer
+    def test_find_all_soup_strainer(self):
+        only_a_tags = SoupStrainer('a')
+        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
+        links = soup.find_all(only_a_tags)
+        expected_links = [
+            '<a href="https://www.wikipedia.org/">This is a hyperlink to wikipedia!</a>',
+            '<a href="https://www.facebook.com/">This is a hyperlink to facebook!</a>',
+            '<a href="https://creativecommons.org/">Site goes under Creative Commons</a>'
+        ]
+        
+        for (i, link) in enumerate(links):
+            self.assertTrue(i < 3)
+            self.assertEqual(str(link), expected_links[i])
+
+    # Test name
+    def test_find_all_name(self):
+        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
+        links = soup.find_all(True)
+        self.assertIsNotNone(links)
+
+    # Test colon name
+    def test_find_all_colon_name(self):
+        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
+        aside = soup.find_all('aside:colon')
+
+        self.assertEqual(str(aside[0]), '<aside:colon>Hello, World!</aside:colon>')
+
+    # Test non recursive call
+    def test_find_all_non_recursive(self):
+        soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
+        links = soup.find_all('a', recursive=False)
+        expected_links = [
+            '<a href="https://www.wikipedia.org/">This is a hyperlink to wikipedia!</a>',
+            '<a href="https://www.facebook.com/">This is a hyperlink to facebook!</a>',
+            '<a href="https://creativecommons.org/">Site goes under Creative Commons</a>'
+        ]
+
+        for (i, link) in enumerate(links):
+            self.assertTrue(i < 3)
+            self.assertEqual(str(link), expected_links[i])
+
 
 if __name__ == '__main__':
     unittest.main()
