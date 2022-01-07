@@ -321,37 +321,6 @@ class TreeModificationTests(unittest.TestCase):
         expected_contents = "abc123"
         tree.body.insert(0, expected_contents)
         self.assertEqual(tree.body.contents[0], expected_contents)
-
-    #insert_before()
-    def test_insert_before_nonetype(self):
-        tree = BeautifulSoup(self.test_tree, "html.parser")
-        with self.assertRaises(ValueError):
-            tree.contents[0].insert_before(None)
-
-    def test_insert_before_empty_insert(self):
-        tree = BeautifulSoup(self.test_tree, "html.parser")
-        expected = BeautifulSoup(self.test_tree, "html.parser")
-        tree.contents[0].insert_before()
-        self.assertEqual(tree.prettify(), expected.prettify())
-
-    def test_insert_before_PageElement_multiple(self):
-        tree = BeautifulSoup(self.test_tree, "html.parser")
-        expected = [BeautifulSoup("<p>Test paragraph</p>", "html.parser"), BeautifulSoup("<p>Test paragraph 2</p>", "html.parser")]
-        tree.contents[0].insert_before(expected[0], expected[1])
-        self.assertEqual(str(tree.contents[0]), "<p>Test paragraph</p>")
-        self.assertEqual(str(tree.contents[1]), "<p>Test paragraph 2</p>")
-
-    def test_insert_before_string_multiple(self):
-        tree = BeautifulSoup(self.test_tree, "html.parser")
-        expected = ["<p>Test paragraph</p>", "<p>Test paragraph 2</p>"]
-        tree.body.contents[0].insert_before(expected[0], expected[1])
-        self.assertEqual(tree.body.contents[0].string, expected[0])
-        self.assertEqual(tree.body.contents[1].string, expected[1])
-
-    def test_insert_before_self_in_args(self):
-        tree = BeautifulSoup(self.test_tree, "html.parser")
-        with self.assertRaises(ValueError):
-            tree.contents[0].insert_before(tree.contents[0])
     
     #insert_after()
     def test_insert_after_nonetype(self):
@@ -595,7 +564,38 @@ class TreeFindTest(unittest.TestCase):
 
         self.assertTrue(len(siblings) == 0)
 
-class WhiteBoxTesting:
+class WhiteBoxTesting(unittest.TestCase):
+    html_text_gabe = """
+    <html>
+    <head>
+        <title>The test title</title>
+    </head>
+    <body>
+        <p>This is a paragraph.</p>
+        <p>This is a paragraph with hyperlinks
+            <a href="https://www.wikipedia.org/">This is a hyperlink to wikipedia!</a>
+            <a href="https://www.facebook.com/">This is a hyperlink to facebook!</a>
+        </p>
+        <div id="test_id">Find me!</div>
+        <main id="main_tag">
+            <img src="https://www.python.org/static/community_logos/python-logo.png" width="200px" height="130px" />
+        </main>
+        <a href="https://creativecommons.org/">Site goes under Creative Commons</a>
+        <aside:colon>Hello, World!</aside:colon>
+    </body>
+    </html>
+    """
+
+    test_tree = """
+    <html><head><title>Title text</title></head>
+    <body>
+    <p class="p_class1"></p>
+    <p class="p_class2"></p>
+    <a href="https://www.google.com/">Google link></a>
+    </body>
+    </html>
+    """
+
     # Test clear simple with decompose
     def test_clear_simple_with_decompose_without_tag(self):
         simple_tag = "<div>Test</div>"
@@ -689,6 +689,36 @@ class WhiteBoxTesting:
             self.assertTrue(i < 3)
             self.assertEqual(str(link), expected_links[i])
 
+    #insert_before()
+    def test_insert_before_nonetype(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        with self.assertRaises(ValueError):
+            tree.contents[0].insert_before(None)
+
+    def test_insert_before_empty_insert(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        expected = BeautifulSoup(self.test_tree, "html.parser")
+        tree.contents[0].insert_before()
+        self.assertEqual(tree.prettify(), expected.prettify())
+
+    def test_insert_before_PageElement_multiple(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        expected = [BeautifulSoup("<p>Test paragraph</p>", "html.parser"), BeautifulSoup("<p>Test paragraph 2</p>", "html.parser")]
+        tree.contents[0].insert_before(expected[0], expected[1])
+        self.assertEqual(str(tree.contents[0]), "<p>Test paragraph</p>")
+        self.assertEqual(str(tree.contents[1]), "<p>Test paragraph 2</p>")
+
+    def test_insert_before_string_multiple(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        expected = ["<p>Test paragraph</p>", "<p>Test paragraph 2</p>"]
+        tree.body.contents[0].insert_before(expected[0], expected[1])
+        self.assertEqual(tree.body.contents[0].string, expected[0])
+        self.assertEqual(tree.body.contents[1].string, expected[1])
+
+    def test_insert_before_self_in_args(self):
+        tree = BeautifulSoup(self.test_tree, "html.parser")
+        with self.assertRaises(ValueError):
+            tree.contents[0].insert_before(tree.contents[0])
 
 if __name__ == '__main__':
     unittest.main()
