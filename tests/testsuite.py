@@ -590,7 +590,7 @@ class WhiteBoxTesting(unittest.TestCase):
     # WHITE BOX tests for - clear()
     #
 
-    # Test clear simple with decompose
+    # Test clear() with simple tag without using decompose
     def test_clear_simple_with_decompose_without_tag(self):
         simple_tag = "<div>Test</div>"
         soup = BeautifulSoup(simple_tag, 'html.parser')
@@ -609,7 +609,7 @@ class WhiteBoxTesting(unittest.TestCase):
         self.assertEqual(str(soup), "<div></div>")
         self.assertEqual(len(soup.div), 0)
 
-    # Test clear simple with decompose
+    # Test clear() with simple tag using decompose
     def test_clear_simple_with_decompose_with_tag(self):
         simple_tag = "<div><h1>Test</h1></div>"
         soup = BeautifulSoup(simple_tag, 'html.parser')
@@ -632,7 +632,7 @@ class WhiteBoxTesting(unittest.TestCase):
     # WHITE BOX tests for - find_all()
     #
 
-    #Test find all with limit
+    # Test find_all() using a limit
     def test_find_all_limit(self):
         soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
         links = soup.find_all('a', limit=2)
@@ -645,7 +645,7 @@ class WhiteBoxTesting(unittest.TestCase):
             self.assertTrue(i < 2)
             self.assertEqual(str(link), expected_links[i])
 
-    # Test SoupStrainer
+    # Test find_all() using SoupStrainer
     def test_find_all_soup_strainer(self):
         only_a_tags = SoupStrainer('a')
         soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
@@ -660,20 +660,20 @@ class WhiteBoxTesting(unittest.TestCase):
             self.assertTrue(i < 3)
             self.assertEqual(str(link), expected_links[i])
 
-    # Test name
+    # Test find_all() using a filter on tag name
     def test_find_all_name(self):
         soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
         links = soup.find_all(True)
         self.assertIsNotNone(links)
 
-    # Test colon name
+    # Test find_all() with a colon name
     def test_find_all_colon_name(self):
         soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
         aside = soup.find_all('aside:colon')
 
         self.assertEqual(str(aside[0]), '<aside:colon>Hello, World!</aside:colon>')
 
-    # Test non recursive call
+    # Test find_all() in a non-recursive manner
     def test_find_all_non_recursive(self):
         soup = BeautifulSoup(self.html_text_gabe, 'html.parser')
         links = soup.find_all('a', recursive=False)
@@ -728,7 +728,7 @@ class WhiteBoxTesting(unittest.TestCase):
     # WHITE BOX tests for - insert()
     #
 
-    # Test for inserting tag into itself
+    # Test insert() - inserting tag into itself
     def test_insert_into_itself(self):
         simple_tag = "<div></div>"
         soup = BeautifulSoup(simple_tag, 'html.parser')
@@ -736,7 +736,7 @@ class WhiteBoxTesting(unittest.TestCase):
         with self.assertRaises(ValueError):
             soup.insert(0, soup)
 
-    # Test for inserting tag at index lower than tag index
+    # Test insert() - with tag at index lower than tag index
     def test_insert_at_lower_index(self):
         simple_tag = "<div><h1></h1><h2></h2><h3></h3></div>"
         soup = BeautifulSoup(simple_tag, 'html.parser')
@@ -748,7 +748,7 @@ class WhiteBoxTesting(unittest.TestCase):
     # WHITE BOX tests for - smooth()
     #
 
-    # Test smoothing recursively which means an element is a tag
+    # Test smooth() - making sure it is done in a recursive manner which means the encountered element is a tag
     def test_smooth_is_tag(self):
         simple_tag = "<div><h1>Title</h1></div>"
         soup = BeautifulSoup(simple_tag, 'html.parser')
@@ -757,7 +757,7 @@ class WhiteBoxTesting(unittest.TestCase):
 
         self.assertEqual(soup.h1.contents[0], "TitleHej, jag heter Patrik")
 
-    # Test content is not a NavigableString which means it will not get smoothed
+    # Test smooth() - content is not a NavigableString which means it will not get smoothed
     def test_smooth_not_navigable_string(self):
         simple_tag = "<div><h1>Title</h1></div>"
         soup = BeautifulSoup(simple_tag, 'html.parser')
