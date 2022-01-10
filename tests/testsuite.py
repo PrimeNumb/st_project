@@ -114,6 +114,7 @@ class TreeNavigationBlackboxTest(unittest.TestCase):
         </body>
     """
 
+    # Test to traverse the tree and take out the string
     def test_find_strings_of_tags(self):
         soup = BeautifulSoup(self.html_text, 'html.parser')
         head, body, p, a, title = soup.head.string, soup.body.string, soup.p.string, soup.a.string, soup.title.string
@@ -124,6 +125,7 @@ class TreeNavigationBlackboxTest(unittest.TestCase):
         self.assertEqual(p, 'This is a paragraph.')
         self.assertEqual(a, 'This is a hyperlink to wikipedia!')
 
+    # Test to replace the string of a tag to another string of a tag
     def test_replace_string_of_tag(self):
         soup = BeautifulSoup(self.html_text, 'html.parser')
         head = soup.head
@@ -132,6 +134,7 @@ class TreeNavigationBlackboxTest(unittest.TestCase):
         self.assertEqual(head.string, 'This is a paragraph.')
         self.assertNotEqual(head.string, 'The test title')
 
+    # Test to get strings of a tags children
     def test_body_children(self):
         soup = BeautifulSoup(self.html_text, 'html.parser')
         body = []
@@ -144,6 +147,7 @@ class TreeNavigationBlackboxTest(unittest.TestCase):
         self.assertEqual(body[3].string, None) # If a tag contains more than one string element, then .string is defined to be None:
         self.assertEqual(body[4].string, '\n')
 
+    # Test to get name of a tags children
     def test_body_children_tag_name(self):
         soup = BeautifulSoup(self.html_text, 'html.parser')
         body = []
@@ -157,6 +161,7 @@ class TreeNavigationBlackboxTest(unittest.TestCase):
         self.assertEqual(body[3].name, 'p')
         self.assertEqual(body[4].name, None)
 
+    # Test stripped_strings to get actual strings in childs of a tag
     def test_strings_for_all_body_children(self):
         soup = BeautifulSoup(self.html_text, 'html.parser')
         body = []
@@ -168,11 +173,16 @@ class TreeNavigationBlackboxTest(unittest.TestCase):
         self.assertEqual(body[2], 'This is a hyperlink to wikipedia!')
         self.assertEqual(body[3], 'This is a hyperlink to facebook!')
 
+    # Test to traverse to parent node of a tag
     def test_parent_from_tag(self):
         soup = BeautifulSoup(self.html_text, 'html.parser')
         title = soup.title
         self.assertEqual(title.parent.string, 'The test title')
+        parent_tag = title.parent
+        self.assertEqual(parent_tag, soup.head)
+        self.assertEqual(parent_tag.name, 'head')
     
+    # Test to find all parents of a tag
     def test_parents_from_tag(self):
         soup = BeautifulSoup(self.html_text, 'html.parser')
         a = soup.a
@@ -185,6 +195,7 @@ class TreeNavigationBlackboxTest(unittest.TestCase):
         self.assertEqual(parents[1], 'body')
         self.assertEqual(parents[2], 'html')
 
+    # Test to get next sibling in tree
     def test_next_sibling(self):
         soup = BeautifulSoup(self.html_text, 'html.parser')
         a = soup.a
@@ -193,7 +204,7 @@ class TreeNavigationBlackboxTest(unittest.TestCase):
         self.assertEqual(a.next_sibling.string, '\n')
         self.assertEqual(a.next_sibling.next_sibling.string, 'This is a hyperlink to facebook!')
 
-    
+    # Test to get all next siblings in tree
     def test_next_siblings(self):
         soup = BeautifulSoup(self.html_text, 'html.parser')
         a = soup.a
@@ -207,6 +218,7 @@ class TreeNavigationBlackboxTest(unittest.TestCase):
         self.assertEqual(siblings[1], '<a href="https://www.facebook.com/">This is a hyperlink to facebook!</a>')
         self.assertEqual(siblings[2], "'\\n'")
 
+    # Test to traverse back and forth the tree
     def test_next_and_previous_element(self):
         soup = BeautifulSoup(self.html_text, 'html.parser')
         a = soup.a
@@ -216,6 +228,7 @@ class TreeNavigationBlackboxTest(unittest.TestCase):
 
         self.assertEqual(a, previous)
 
+    # Test to get all next elements of a tag
     def test_next_elements(self):
         soup = BeautifulSoup(self.html_text, 'html.parser')
         a = soup.a
