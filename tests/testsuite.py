@@ -245,6 +245,7 @@ class TreeNavigationBlackboxTest(unittest.TestCase):
 
 class BsoupFunctionsBlackboxTest(unittest.TestCase):
 
+    # Basic test to see if smooth() consolidates adjacent strings
     def test_smooth_basic(self):
         soup = BeautifulSoup('<p>A paragraph!</p>', 'html.parser')
         soup.p.append('Another paragraph')
@@ -253,12 +254,14 @@ class BsoupFunctionsBlackboxTest(unittest.TestCase):
 
         soup.p.smooth()
         self.assertEqual(soup.p.contents[0], 'A paragraph!Another paragraph')
-    
+
+    # Making sure smooth doesn't change anything when only one string is present
     def test_smooth_one_element(self):
         soup = BeautifulSoup('<h1>Useless heading 1</h1>', 'html.parser')
         soup.h1.smooth()
         self.assertEqual(soup.h1.contents[0], 'Useless heading 1')
 
+    # Testing smooth for a large amount of strings
     def test_smooth_many(self):
         soup = BeautifulSoup('<h1>Useless heading 1</h1>', 'html.parser')
 
@@ -269,16 +272,19 @@ class BsoupFunctionsBlackboxTest(unittest.TestCase):
         soup.h1.smooth()
         self.assertEqual(soup.h1.contents[0][-3:], '999')
 
+    # Basic test for get_text
     def test_get_text_basic(self):
         soup = BeautifulSoup('<h1>Hello <i>world</i>!</h1>', 'html.parser')
         text = soup.get_text()
         self.assertEqual(text, 'Hello world!')
     
-    def test_get_text_join(self):
+    # Basic test for joining strings under different tags with another string 
+    def test_get_text_join(self):    
         soup = BeautifulSoup('<h1>Hello<i>world</i>!</h1>', 'html.parser')
         text = soup.get_text('|')
         self.assertEqual(text, 'Hello|world|!')
-    
+
+    # Testing the stripping functionality of get_text()
     def test_get_text_strip(self):
         soup = BeautifulSoup('<h1> Hello <i> world </i> ! </h1>', 'html.parser') 
         text_unstripped = soup.get_text()
@@ -286,6 +292,7 @@ class BsoupFunctionsBlackboxTest(unittest.TestCase):
         text_stripped = soup.get_text(strip = True)
         self.assertEqual(text_stripped, 'Helloworld!')
 
+    # Testing the .stripped_strings property
     def test_get_text_stripped_strings(self):
         soup = BeautifulSoup('<h1> Hello <i> world </i> ! </h1>', 'html.parser') 
         res = [text for text in soup.stripped_strings]
