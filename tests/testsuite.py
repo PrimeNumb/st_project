@@ -314,39 +314,46 @@ class TreeModificationTests(unittest.TestCase):
     """
 
     # insert()
+    # Inserting empty string into an invalid index raises exception
     def test_insert_empty_into_invalid_index(self):
         empty_tree = BeautifulSoup("", "html.parser")
         with self.assertRaises(IndexError):
             empty_tree.insert(-1, "")
 
+    # Inserting empty string into empty tree does not change the string representation of the tree
     def test_insert_empty_into_valid_index(self):
         tree = BeautifulSoup(self.test_tree, "html.parser")
         expected = BeautifulSoup(self.test_tree, "html.parser").string
         tree.insert(0, "")
         self.assertEqual(tree.string, expected)
     
+    # Inserting None raises exception
     def test_insert_nonetype(self):
         tree = BeautifulSoup(self.test_tree, "html.parser")
         with self.assertRaises(ValueError):
             tree.insert(0, None)
 
-    def test_insert_parent_element(self):
+    # Inserting string element into first index of root correctly places element at that index
+    def test_insert_root_element(self):
         tree = BeautifulSoup(self.test_tree, "html.parser")
         expected_contents = "abc123"
         tree.insert(0, expected_contents)
         self.assertEqual(tree.contents[0], expected_contents)
     
+    # Inserting string element into first index of child of root correctly places element at that index
     def test_insert_child_element(self):
         tree = BeautifulSoup(self.test_tree, "html.parser")
         expected_contents = "abc123"
         tree.body.insert(0, expected_contents)
         self.assertEqual(tree.body.contents[0], expected_contents)
     
-        #extract()
+    # extract()
+    # Extracting from the empty tree does nothing
     def test_extract_empty_tree(self):
         empty_tree = BeautifulSoup("", "html.parser")
         self.assertEqual(empty_tree.extract(), empty_tree)
     
+    # Extracting tag from test tree returns correct element
     def test_extract_populated_tree(self):
         tree = BeautifulSoup(self.test_tree, "html.parser")
         expected = BeautifulSoup('<p class="p_class1"></p>', "html.parser")
@@ -354,14 +361,15 @@ class TreeModificationTests(unittest.TestCase):
         self.assertEqual(expected.contents[0], returned)
 
     #decompose()
+    # Empty tree is correctly decomposed
     def test_decompose_empty_tree(self):
         empty_tree = BeautifulSoup("", "html.parser")
-        expected = BeautifulSoup("", "html.parser")
         empty_tree.decompose()
         # behavior of a decomposed element is undefined according to the documentation,
         # hence why we check the 'decomposed' property instead
         self.assertTrue(empty_tree.decomposed)
     
+    # Decomposing child element of test tree produces tree without that element
     def test_decompose_child_element(self):
         tree = BeautifulSoup("<body><p>Paragraph contents</p></body>", "html.parser")
         expected = BeautifulSoup("<body></body>", "html.parser")
@@ -698,12 +706,14 @@ class WhiteBoxTesting(unittest.TestCase):
     # WHITE BOX tests for - insert_before()
     #
 
+    # Inserting None raises exception
     def test_insert_before_nonetype(self):
         tree = BeautifulSoup(self.test_tree, "html.parser")
         #Ensure inserting None raises ValueError
         with self.assertRaises(ValueError):
             tree.contents[0].insert_before(None)
 
+    # Inserting with no arguments does nothing to the tree
     def test_insert_before_empty_insert(self):
         tree = BeautifulSoup(self.test_tree, "html.parser")
         expected = BeautifulSoup(self.test_tree, "html.parser")
@@ -711,6 +721,7 @@ class WhiteBoxTesting(unittest.TestCase):
         tree.contents[0].insert_before()
         self.assertEqual(tree.prettify(), expected.prettify())
 
+    # Inserting multiple PageElement types correctly places those elements at the right position in the tree
     def test_insert_before_PageElement_multiple(self):
         tree = BeautifulSoup(self.test_tree, "html.parser")
         expected = [BeautifulSoup("<p>Test paragraph</p>", "html.parser"), BeautifulSoup("<p>Test paragraph 2</p>", "html.parser")]
@@ -718,6 +729,7 @@ class WhiteBoxTesting(unittest.TestCase):
         self.assertEqual(str(tree.contents[0]), "<p>Test paragraph</p>")
         self.assertEqual(str(tree.contents[1]), "<p>Test paragraph 2</p>")
 
+    # Inserting multiple string types correctly places those elements at the right position in the tree
     def test_insert_before_string_multiple(self):
         tree = BeautifulSoup(self.test_tree, "html.parser")
         expected = ["<p>Test paragraph</p>", "<p>Test paragraph 2</p>"]
@@ -725,6 +737,7 @@ class WhiteBoxTesting(unittest.TestCase):
         self.assertEqual(tree.body.contents[0].string, expected[0])
         self.assertEqual(tree.body.contents[1].string, expected[1])
 
+    # Inserting a tree into itself raises an exception
     def test_insert_before_self_in_args(self):
         tree = BeautifulSoup(self.test_tree, "html.parser")
         with self.assertRaises(ValueError):
